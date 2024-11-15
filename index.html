@@ -3,69 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurantes Próximos</title>
+    <title>Minha Localização Atual</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        #map { height: 400px; width: 100%; }
+        #location { margin: 20px 0; }
     </style>
 </head>
 <body>
-    <h1>10 Restaurantes Mais Próximos</h1>
-    <table id="restaurant-table">
-        <tr>
-            <th>Nome</th>
-            <th>Endereço</th>
-            <th>Distância</th>
-        </tr>
-    </table>
+    <h1>Minha Localização Atual</h1>
+    <div id="location"></div>
+    <div id="map"></div>
     <script>
-        function initMap(userLocation) {
-            const map = new google.maps.Map(document.createElement('div'));
-            const service = new google.maps.places.PlacesService(map);
-
-            service.nearbySearch({
-                location: userLocation,
-                radius: 2000, // Defina o raio em metros
-                type: ['restaurant']
-            }, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    const table = document.getElementById('restaurant-table');
-                    results.slice(0, 10).forEach(place => {
-                        const row = table.insertRow();
-                        const nameCell = row.insertCell(0);
-                        const addressCell = row.insertCell(1);
-                        const distanceCell = row.insertCell(2);
-                        
-                        nameCell.textContent = place.name;
-                        addressCell.textContent = place.vicinity;
-                        distanceCell.textContent = `${Math.round(google.maps.geometry.spherical.computeDistanceBetween(
-                            new google.maps.LatLng(userLocation), place.geometry.location) / 1000 * 10) / 10} km`;
-                    });
-                }
+        function initMap(lat, lng) {
+            const location = { lat: lat, lng: lng };
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: location,
+                zoom: 15
             });
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+        }
+
+        function showError(error) {
+            const locationDiv = document.getElementById('location');
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    locationDiv.textContent = "Usuário negou a solicitação de Geolocalização.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    locationDiv.textContent = "Informações de localização não estão disponíveis.";
+                    break;
+                case error.TIMEOUT:
+                    locationDiv.textContent = "A solicitação para obter a localização do usuário expirou.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    locationDiv.textContent = "Um erro desconhecido ocorreu.";
+                    break;
+            }
         }
 
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
-                    const userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    initMap(userLocation);
-                }, () => {
-                    alert("Não foi possível obter a localização. Verifique as permissões de localização no seu navegador.");
-                });
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const locationDiv = document.getElementById('location');
+                    locationDiv.textContent = `Latitude: ${lat}, Longitude: ${lng}`;
+                    initMap(lat, lng);
+                }, showError);
             } else {
-                alert("Geolocalização não é suportada pelo seu navegador.");
+                const locationDiv = document.getElementById('location');
+                locationDiv.textContent = "Geolocalização não é suportada pelo seu navegador.";
             }
         }
 
         getLocation();
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places,geometry"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I"></script>
 </body>
 </html>
