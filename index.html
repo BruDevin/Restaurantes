@@ -7,14 +7,33 @@
             height: 400px;
             width: 100%;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places,geometry"></script>
 </head>
 <body>
     <h1>Minha Localização Atual</h1>
     <div id="map"></div>
-    <h2>Restaurantes Mais Próximos</h2>
-    <ul id="nearby-places"></ul>
+    <h2>Estabelecimentos Próximos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Distância (km)</th>
+            </tr>
+        </thead>
+        <tbody id="nearby-places"></tbody>
+    </table>
 
     <script>
         function initMap() {
@@ -26,7 +45,7 @@
                     };
 
                     var map = new google.maps.Map(document.getElementById('map'), {
-                        zoom: 14,
+                        zoom: 16,
                         center: pos
                     });
 
@@ -39,19 +58,29 @@
                     var service = new google.maps.places.PlacesService(map);
                     service.nearbySearch({
                         location: pos,
-                        radius: 5000, // 5 km
-                        type: ['restaurant']
+                        radius: 200, // 200 metros
+                        type: ['restaurant', 'bar', 'cafe']
                     }, function(results, status) {
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            results.sort(function(a, b) {
+                                var distA = google.maps.geometry.spherical.computeDistanceBetween(pos, a.geometry.location);
+                                var distB = google.maps.geometry.spherical.computeDistanceBetween(pos, b.geometry.location);
+                                return distA - distB;
+                            });
+
                             var list = document.getElementById('nearby-places');
                             list.innerHTML = '';
-                            results.forEach(function(place) {
-                                var name = place.name;
+                            results.slice(0, 10).forEach(function(place) {
                                 var distance = google.maps.geometry.spherical.computeDistanceBetween(pos, place.geometry.location);
                                 var distanceText = (distance / 1000).toFixed(2) + ' km';
-                                var li = document.createElement('li');
-                                li.textContent = name + ' - ' + distanceText;
-                                list.appendChild(li);
+                                var tr = document.createElement('tr');
+                                var nameTd = document.createElement('td');
+                                var distanceTd = document.createElement('td');
+                                nameTd.textContent = place.name;
+                                distanceTd.textContent = distanceText;
+                                tr.appendChild(nameTd);
+                                tr.appendChild(distanceTd);
+                                list.appendChild(tr);
                             });
                         }
                     });
@@ -66,7 +95,7 @@
         function handleLocationError(browserHasGeolocation, pos) {
             var map = new google.maps.Map(document.getElementById('map'), {
                 center: pos,
-                zoom: 14
+                zoom: 16
             });
             var infoWindow = new google.maps.InfoWindow({
                 position: pos,
