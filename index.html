@@ -56,6 +56,8 @@
                         lng: position.coords.longitude
                     };
                     initMap(userLocation);
+                }, () => {
+                    alert("Não foi possível obter a localização. Verifique as permissões de localização no seu navegador.");
                 });
             } else {
                 alert("Geolocalização não é suportada pelo seu navegador.");
@@ -64,6 +66,6 @@
 
         getLocation();
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places,geometry&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places,geometry"></script>
 </body>
 </html>
