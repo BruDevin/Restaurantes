@@ -27,7 +27,7 @@
 
             service.nearbySearch({
                 location: userLocation,
-                radius: 100, // Defina o raio em metros
+                radius: 50, // Defina o raio em metros
                 type: ['restaurant']
             }, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
@@ -46,6 +46,7 @@
                         distanceCell.textContent = `${(distance / 1000).toFixed(2)} km`;
                     });
                 } else {
+                    document.getElementByTagName('th').value = 'erro';
                     console.error('Erro ao buscar lugares:', status);
                 }
             });
