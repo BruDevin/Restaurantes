@@ -8,11 +8,13 @@
             width: 100%;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places"></script>
 </head>
 <body>
     <h1>Minha Localização Atual</h1>
     <div id="map"></div>
+    <h2>Restaurantes Mais Próximos</h2>
+    <ul id="nearby-places"></ul>
 
     <script>
         function initMap() {
@@ -33,11 +35,30 @@
                         map: map,
                         title: 'Você está aqui!'
                     });
+
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch({
+                        location: pos,
+                        radius: 5000, // 5 km
+                        type: ['restaurant']
+                    }, function(results, status) {
+                        if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            var list = document.getElementById('nearby-places');
+                            list.innerHTML = '';
+                            results.forEach(function(place) {
+                                var name = place.name;
+                                var distance = google.maps.geometry.spherical.computeDistanceBetween(pos, place.geometry.location);
+                                var distanceText = (distance / 1000).toFixed(2) + ' km';
+                                var li = document.createElement('li');
+                                li.textContent = name + ' - ' + distanceText;
+                                list.appendChild(li);
+                            });
+                        }
+                    });
                 }, function() {
                     handleLocationError(true, map.getCenter());
                 });
             } else {
-                // Browser doesn't support Geolocation
                 handleLocationError(false, map.getCenter());
             }
         }
