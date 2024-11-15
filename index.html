@@ -59,7 +59,7 @@
                     service.nearbySearch({
                         location: pos,
                         radius: 200, // 200 metros
-                        type: ['restaurant', 'bar', 'cafe']
+                        type: ['restaurant', 'bar']
                     }, function(results, status) {
                         if (status === google.maps.places.PlacesServiceStatus.OK) {
                             results.sort(function(a, b) {
