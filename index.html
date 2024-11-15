@@ -15,7 +15,7 @@
     <h1>10 Restaurantes Mais Próximos</h1>
     <table id="restaurant-table">
         <tr>
-            <th>Nome</th>
+            <th id="teste">Nome</th>
             <th>Endereço</th>
             <th>Distância</th>
         </tr>
@@ -46,7 +46,7 @@
                         distanceCell.textContent = `${(distance / 1000).toFixed(2)} km`;
                     });
                 } else {
-                    document.getElementByTagName('th').value = 'erro';
+                    document.getElementById('teste').value = 'erro';
                     console.error('Erro ao buscar lugares:', status);
                 }
             });
