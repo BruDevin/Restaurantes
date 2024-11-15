@@ -1,93 +1,62 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurantes Próximos</title>
+    <title>Minha Localização Atual</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        #map {
+            height: 400px;
+            width: 100%;
+        }
     </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_API_KEY"></script>
 </head>
 <body>
-    <h1>10 Restaurantes Mais Próximos</h1>
-    <table id="restaurant-table">
-        <tr>
-            <th id="teste">Nome</th>
-            <th>Endereço</th>
-            <th>Distância</th>
-        </tr>
-    </table>
+    <h1>Minha Localização Atual</h1>
+    <div id="map"></div>
+
     <script>
-        function initMap(userLocation) {
-            const map = new google.maps.Map(document.createElement('div'));
-            const service = new google.maps.places.PlacesService(map);
-
-            service.nearbySearch({
-                location: userLocation,
-                radius: 50, // Defina o raio em metros
-                type: ['restaurant']
-            }, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    const table = document.getElementById('restaurant-table');
-                    results.slice(0, 10).forEach(place => {
-                        const row = table.insertRow();
-                        const nameCell = row.insertCell(0);
-                        const addressCell = row.insertCell(1);
-                        const distanceCell = row.insertCell(2);
-
-                        const placeLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
-                        const distance = google.maps.geometry.spherical.computeDistanceBetween(userLocation, placeLocation);
-
-                        nameCell.textContent = place.name;
-                        addressCell.textContent = place.vicinity;
-                        distanceCell.textContent = `${(distance / 1000).toFixed(2)} km`;
-                    });
-                } else {
-                    document.getElementById('teste').value = 'erro';
-                    console.error('Erro ao buscar lugares:', status);
-                }
-            });
-        }
-
-        function showError(error) {
-            const locationDiv = document.getElementById('location');
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    locationDiv.textContent = "Usuário negou a solicitação de Geolocalização.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    locationDiv.textContent = "Informações de localização não estão disponíveis.";
-                    break;
-                case error.TIMEOUT:
-                    locationDiv.textContent = "A solicitação para obter a localização do usuário expirou.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    locationDiv.textContent = "Um erro desconhecido ocorreu.";
-                    break;
-            }
-        }
-
-        function getLocation() {
+        function initMap() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const userLocation = {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
-                    initMap(userLocation);
-                }, showError);
+
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 14,
+                        center: pos
+                    });
+
+                    var marker = new google.maps.Marker({
+                        position: pos,
+                        map: map,
+                        title: 'Você está aqui!'
+                    });
+                }, function() {
+                    handleLocationError(true, map.getCenter());
+                });
             } else {
-                alert("Geolocalização não é suportada pelo seu navegador.");
+                // Browser doesn't support Geolocation
+                handleLocationError(false, map.getCenter());
             }
         }
 
-        getLocation();
+        function handleLocationError(browserHasGeolocation, pos) {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: pos,
+                zoom: 14
+            });
+            var infoWindow = new google.maps.InfoWindow({
+                position: pos,
+                content: browserHasGeolocation ?
+                    'Erro: Falha no serviço de geolocalização.' :
+                    'Erro: Seu navegador não suporta geolocalização.'
+            });
+            infoWindow.open(map);
+        }
+
+        window.onload = initMap;
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1sTn_yUiY4Iek3ZukqgYGN3xJGXQSt7I&libraries=places,geometry"></script>
 </body>
 </html>
-
-
